@@ -8,13 +8,13 @@ pygame.display.set_caption("Storgata simulator")
 # const
 WHITE = (255, 255, 255)
 AUTOCLICK_EVENT = pygame.USEREVENT + 1
-WIDTH, HEIGHT = 960, 540
+WIDTH, HEIGHT = 1280, 720
 WINDOW = pygame.display.set_mode([WIDTH, HEIGHT])
 FONT = pygame.font.SysFont("Comic sans", 25)
 running = True
 
 # var
-score = 0
+score = 10000000
 click_base = 1
 clicks = click_base
 base_cost = 50
@@ -30,16 +30,17 @@ adict_pps_max = 500
 adict_cnt = 0
 od_base = 1000000
 od_cost = od_base
-od_cnt = 1
+od_mult = 1
+od_cnt = 0
 buttons = [
     Button(600, 50, 200, 60, f"higher potency ({upg_cost})", (0, 0, 255), (0, 255, 0)),
-    Button(
-        600, 130, 200, 60, f"unlock adiction ({adict_cost})", (0, 0, 255), (0, 255, 0)
-    ),
-    Button(600, 210, 200, 60, f"overdose ({od_cost})", (0, 0, 255), (0, 255, 0)),
+    Button(600, 130, 200, 60, f"unlock adiction ({adict_cost})", (0, 0, 255), (0, 255, 0)),
+    Button(600, 290, 200, 60, f"unlock other drugs", (0, 0, 255), (0, 255, 0)),
+    Button(600, 500, 200, 60, f"overdose ({od_cost})", (0, 0, 255), (0, 255, 0)),
 ]
-pille = Pill(150, 200)
-
+pille = Pill(150, 200, "sprites/pillar.png")
+stikk = Pill(150, 200, "sprites/2865440.png")
+sniff = Pill(150, 200, "sprites/Sugar_JE2_BE2.png")
 
 # loop
 while running:
@@ -54,6 +55,7 @@ while running:
                 score += clicks
 
             for btn in buttons:
+
                 if btn._rect.collidepoint(event.pos):
                     if "potency" in btn._text and score >= upg_cost:
                         score -= upg_cost
@@ -76,22 +78,32 @@ while running:
                                 )
                             adict_cost = round(adict_base * (upg_mult**adict_cnt))
                             pygame.time.set_timer(AUTOCLICK_EVENT, adict_time)
-                        print(adict_cnt)
+
                         if adict_cnt == 20:
-                            btn._text = f"Maxed Out"
+                            btn._text = f"maxed out"
                         else:
                             btn._text = f"adiction +1 ({adict_cost}) {adict_cnt}/20"
                     elif "overdose" in btn._text and score >= od_cost:
                         score, upg_cnt, adict_cnt = 0, 0, 0
+                        (
+                            adict_cost,
+                            upg_cost,
+                            adict_time,
+                        ) = (
+                            adict_base,
+                            base_cost,
+                            adict_time_base,
+                        )
                         od_cnt += 1
-                        clicks = round(click_base * od_cnt)
+                        od_mult += od_cnt
+                        clicks = round(click_base + od_mult**od_cnt)
                         od_cost = round(od_base * (upg_mult**od_cnt))
                         btn._text = f"overdose + 1 ({od_cost})"
-                        print(clicks, od_cnt, click_base)
+                    
 
     WINDOW.fill(WHITE)
 
-    pille.draw_pill(WINDOW)
+    sniff.draw_pill(WINDOW)
 
     if score < od_cost:
         for btn in buttons[0:2]:
@@ -100,9 +112,9 @@ while running:
         for btn in buttons:
             btn.draw(WINDOW)
 
-    score_txt = FONT.render(f"Pills: {score}", True, (0, 0, 0))
+    score_txt = FONT.render(f"Drugs: {score}", True, (0, 0, 0))
     power_txt = FONT.render(f"Per Click: {clicks}", True, (0, 0, 0))
-    adcit_txt = FONT.render(f"adcition: pills per {adict_time}ms", True, (0, 0, 0))
+    adcit_txt = FONT.render(f"adcition: drugs per {adict_time/1000}s", True, (0, 0, 0))
     WINDOW.blit(score_txt, (20, 20))
     WINDOW.blit(power_txt, (20, 50))
     WINDOW.blit(adcit_txt, (20, 80))

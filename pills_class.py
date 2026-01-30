@@ -1,8 +1,8 @@
 import pygame
 class Pill():
-    def __init__(self, x, y):
+    def __init__(self, x, y, img):
         
-        self.image = pygame.image.load('sprites/pille.png').convert_alpha()
+        self.image = pygame.image.load(img).convert_alpha()
         
         self.rect = self.image.get_rect(topleft=(x,y))
     
