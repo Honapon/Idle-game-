@@ -14,7 +14,7 @@ FONT = pygame.font.SysFont("Comic sans", 25)
 running = True
 
 # var
-score = 10000000
+score = 0
 click_base = 1
 clicks = click_base
 base_cost = 50
@@ -32,11 +32,12 @@ od_base = 1000000
 od_cost = od_base
 od_mult = 1
 od_cnt = 0
+od_re = 1
 buttons = [
     Button(600, 50, 200, 60, f"higher potency ({upg_cost})", (0, 0, 255), (0, 255, 0)),
     Button(600, 130, 200, 60, f"unlock adiction ({adict_cost})", (0, 0, 255), (0, 255, 0)),
-    Button(600, 290, 200, 60, f"unlock other drugs", (0, 0, 255), (0, 255, 0)),
     Button(600, 500, 200, 60, f"overdose ({od_cost})", (0, 0, 255), (0, 255, 0)),
+    # Button(600, 290, 200, 60, f"unlock other drugs", (0, 0, 255), (0, 255, 0)),
 ]
 pille = Pill(150, 200, "sprites/pillar.png")
 stikk = Pill(150, 200, "sprites/2865440.png")
@@ -55,7 +56,7 @@ while running:
                 score += clicks
 
             for btn in buttons:
-
+                
                 if btn._rect.collidepoint(event.pos):
                     if "potency" in btn._text and score >= upg_cost:
                         score -= upg_cost
@@ -68,6 +69,8 @@ while running:
                             adict_time = adict_time_base
                             adict_cnt = 0
                             btn._text = f"adiction +1 ({adict_cost}) {adict_cnt}/20"
+                            pygame.time.set_timer(AUTOCLICK_EVENT, adict_time_base)
+
                         else:
                             if adict_cnt <= 20:
                                 score -= adict_cost
@@ -98,8 +101,13 @@ while running:
                         od_mult += od_cnt
                         clicks = round(click_base + od_mult**od_cnt)
                         od_cost = round(od_base * (upg_mult**od_cnt))
-                        btn._text = f"overdose + 1 ({od_cost})"
-                    
+                        
+                        pygame.time.set_timer(AUTOCLICK_EVENT, 0)
+                        
+                        buttons[0]._text = f"higher potency ({upg_cost})"
+                        buttons[1]._text = f"unlock adiction ({adict_cost})"
+                        buttons[2]._text = f"overdose + 1 ({od_cost})"
+
 
     WINDOW.fill(WHITE)
 
